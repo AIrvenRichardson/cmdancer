@@ -1,9 +1,19 @@
 #include "include/raylib.h"
 #include <ncurses.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
 
 #define MAX_NAME_SIZE 30
+
+void ProcessAudio(void *buffer, unsigned int frames)
+{
+    uint32_t *samples = (uint32_t *)buffer;
+
+    printf("%d ", *samples);
+    printf("\n");
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +40,7 @@ int main(int argc, char *argv[])
 
     //Setup the music finally
     InitAudioDevice();
+    AttachAudioMixedProcessor(ProcessAudio);
     Music music = LoadMusicStream(resourcepath);
     PlayMusicStream(music);
     float timePlayed = 0.0f;
@@ -58,6 +69,7 @@ int main(int argc, char *argv[])
     //De-init everything
     endwin();
     UnloadMusicStream(music);
+    DetachAudioMixedProcessor(ProcessAudio);
     CloseAudioDevice();
     return 0;
 }
