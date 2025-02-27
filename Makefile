@@ -2,8 +2,7 @@
 CC := gcc
 CFLAGS := -Wall -std=c99 -Wno-missing-braces
 INC = -I include/
-LIB = -L lib/ -lraylib -lGL -lm -lpthread -ldl -lrt 
-
+LIB = -L lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lncurses
 out: main.o
 	$(CC) main.o -o out $(CFLAGS) $(INC) $(LIB)
 

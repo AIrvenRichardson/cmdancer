@@ -1,47 +1,63 @@
 #include "include/raylib.h"
-#include <stdio.h>
-#include <pthread.h>
+#include <ncurses.h>
+#include <string.h>
+#include <sys/stat.h>
 
-void *threadfun(void* arg){
-     InitAudioDevice();
-    Music music = LoadMusicStream("resources/Laserpack.mp3");
+#define MAX_NAME_SIZE 30
 
+int main(int argc, char *argv[])
+{
+    //Ncurses Setup
+    initscr();
+    timeout(1);
+    noecho();
+    char input;
+    const char np[] = "Now Playing: ";
+    char msg[50];
+
+    //Get the file to be played, if none were provided, go to default.
+    char resourcepath[] = "resources/";
+    char musicTitle[30];
+    if (argc == 2)
+    {
+        strncpy(musicTitle,argv[1],MAX_NAME_SIZE);
+    }
+    else
+    {
+        strcpy(musicTitle, "Laserpack.mp3");
+    }
+    strcat(resourcepath,musicTitle);
+
+    //Setup the music finally
+    InitAudioDevice();
+    Music music = LoadMusicStream(resourcepath);
     PlayMusicStream(music);
     float timePlayed = 0.0f;
 
     while (true)
     {
+        //Write the currently playing song on the screen
+        msg[0] = '\0';
+        strcpy(msg, np);
+        strcat(msg,musicTitle);
+        mvaddstr(0,0,msg);
+        //Show the audio data
+        //Keep playing the music
         UpdateMusicStream(music);
-
-        if (*((char *)arg) == '1')
+        //Check for input, stop the program if it's 1
+        input = getch();
+        if (input == '1')
         {
             break;
         }
+        
         timePlayed = GetMusicTimePlayed(music)/GetMusicTimeLength(music);
-
         if (timePlayed > 1.0f) timePlayed = 1.0f;
+        refresh();
     }
-
+    //De-init everything
+    endwin();
     UnloadMusicStream(music);
     CloseAudioDevice();
-
-    return NULL;
-}
-
-int main(void)
-{
-    pthread_t thread;
-
-    char input;
-
-    pthread_create(&thread, NULL, threadfun,(void *) &input);
-
-    while (input != '1')
-    {
-        scanf("%c", &input);
-    }
-
-    pthread_join(thread, NULL);
-
     return 0;
 }
